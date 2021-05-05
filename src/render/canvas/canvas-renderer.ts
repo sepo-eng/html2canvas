@@ -245,15 +245,33 @@ export class CanvasRenderer {
         if (image && container.intrinsicWidth > 0 && container.intrinsicHeight > 0) {
             const box = contentBox(container);
             const path = calculatePaddingBoxPath(curves);
+
+            // We set the default values in case the ratios of the dest:src height and the dest:src width are the same.
+            var imageWidth = container.intrinsicWidth;
+            var imageHeight = container.intrinsicHeight;
+            var imageTop = 0;
+            var imageLeft = 0;
+
+            var srcToDestWidthRatio = imageWidth / box.width;
+            var srcToDestHeightRatio = imageHeight / box.height;
+
+            if (srcToDestWidthRatio > srcToDestHeightRatio) {
+                imageWidth = (box.width / box.height) * imageHeight;
+                imageLeft = (container.intrinsicWidth - imageWidth) / 2;
+            } else if (srcToDestWidthRatio < srcToDestHeightRatio) {
+                imageHeight = (box.height / box.width) * imageWidth;
+                imageTop = (container.intrinsicHeight - imageHeight) / 2;
+            }
+
             this.path(path);
             this.ctx.save();
             this.ctx.clip();
             this.ctx.drawImage(
                 image,
-                0,
-                0,
-                container.intrinsicWidth,
-                container.intrinsicHeight,
+                imageLeft,
+                imageTop,
+                imageWidth,
+                imageHeight,
                 box.left,
                 box.top,
                 box.width,
